@@ -64,13 +64,50 @@
                 </div>
             </div>
 
-            <!-- Tombol Kembali -->
-            <div class="mt-8 text-center">
+            <div class="mt-8 text-center space-x-4 flex justify-center">
+                <!-- Tombol Kembali -->
                 <a href="{{ route('motorcycle.index') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
                     Kembali ke Daftar Motor
                 </a>
+
+                <!-- Tombol Edit -->
+                <a href="{{ route('motorcycle.edit', $motorcycle->id) }}"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    Edit
+                </a>
+
+                <!-- Tombol Hapus dengan SweetAlert -->
+                <button type="button" onclick="confirmDelete({{ $motorcycle->id }})"
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">
+                    Hapus
+                </button>
+
+                <!-- Form Hapus (Disembunyikan) -->
+                <form id="delete-form-{{ $motorcycle->id }}"
+                    action="{{ route('motorcycle.destroy', $motorcycle->id) }}" method="POST" style="display: none;">
+                    @csrf
+                    @method('DELETE')
+                </form>
             </div>
         </div>
     </div>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data ini akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
 </x-layout>

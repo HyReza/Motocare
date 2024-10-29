@@ -102,24 +102,68 @@ class MotorcyclesController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Motorcycles $motorcycles)
+    public function edit($id)
     {
-        abort(404);
+        $motorcycle = Motorcycles::findOrFail($id);
+        return view('motorcycle-edit.index', compact('motorcycle'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMotorcyclesRequest $request, Motorcycles $motorcycles)
+    public function update(Request $request, $id)
     {
-        abort(404);
+        $motorcycle = Motorcycles::findOrFail($id);
+
+        $validated = $request->validate([
+            'owner_name' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'type' => 'required|in:Motor Kopling,Motor Matic,Motor Gigi',
+            'number_plate' => 'required|string|max:255',
+            'first_kilometer' => 'required|integer|min:0',
+            'last_kilometer' => 'required|integer|min:0|gte:first_kilometer',
+            'picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $motorcycle->owner_name = $validated['owner_name'];
+        $motorcycle->brand = $validated['brand'];
+        $motorcycle->model = $validated['model'];
+        $motorcycle->type = $validated['type'];
+        $motorcycle->number_plate = $validated['number_plate'];
+        $motorcycle->first_kilometer = $validated['first_kilometer'];
+        $motorcycle->last_kilometer = $validated['last_kilometer'];
+
+        if ($request->hasFile('picture')) {
+            // Hapus gambar lama jika ada
+            if ($motorcycle->picture && file_exists(public_path('motorcycles/' . $motorcycle->picture))) {
+                unlink(public_path('motorcycles/' . $motorcycle->picture));
+            }
+
+            // Simpan gambar baru
+            $fileName = time() . '.' . $request->picture->extension();
+            $request->picture->move(public_path('motorcycles'), $fileName);
+            $motorcycle->picture = $fileName;
+        }
+
+        $motorcycle->save();
+
+        return redirect()->route('motorcycle.index')->with('success', 'Data motor berhasil diperbarui!');
     }
+
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Motorcycles $motorcycles)
+    public function destroy($id)
     {
-        abort(404);
+        $motorcycle = Motorcycles::findOrFail($id);
+
+        // Jika ada gambar terkait, hapus dari folder public/motorcycles
+        if ($motorcycle->picture && file_exists(public_path('motorcycles/' . $motorcycle->picture))) {
+            unlink(public_path('motorcycles/' . $motorcycle->picture));
+        }
+
+        $motorcycle->delete();
+
+        return redirect()->route('motorcycle.index')->with('success', 'Data motor berhasil dihapus!');
     }
 }

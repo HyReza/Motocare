@@ -1,6 +1,26 @@
 <x-layout>
     <div class="mx-4">
         <div class="grid grid-cols-12 gap-8 m-4">
+            @if (session('success'))
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: '{{ session('success') }}',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                </script>
+            @endif
+            @if ($errors->any())
+                <div class="bg-red-500 text-white p-3 rounded mb-4">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             @if ($motorcycles->isEmpty())
                 <div class="col-span-12">
                     <div class="text-center text-gray-400 bg-gray-800 px-8 py-10 rounded-md">
